@@ -1,0 +1,31 @@
+{
+  "name": "suspicousencounter",
+  "version": "1.0.0",
+  "description": "API that allows user to post uncertain thing found on the internet to share and get advice from others",
+  "license": "ISC",
+  "author": "Hon Kei Ernest Chan",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha --exit",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "mongoose": "^9.6.2",
+    "swagger-ui-express": "^5.0.1",
+    "swagger-jsdoc": "^6.3.0",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "chai": "^6.2.2",
+    "chai-http": "^5.1.2",
+    "mocha": "^11.7.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
