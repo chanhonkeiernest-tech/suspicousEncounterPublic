@@ -16,7 +16,7 @@ import swaggerSpec from './config/swagger.js';
 const url = process.env.frontend;
 const app = express();
 const PORT = process.env.PORT || 3001;
-app.use(cors({ origin: "url", credentials: true }));
+app.use(cors({ origin: url, credentials: true }));
 app.use(
   session({
     // `secret` for session ID cookie.
