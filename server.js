@@ -16,7 +16,7 @@ import swaggerSpec from './config/swagger.js';
 const url = process.env.frontend;
 const app = express();
 const PORT = process.env.PORT || 3001;
-app.use(cors({ origin: url, credentials: true }));
+app.use(cors({ origin: url, methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', credentials: true, secure: true,sameSite: 'none'}));
 app.set('trust proxy', 1);
 app.use(
   session({
@@ -38,6 +38,7 @@ app.use(
       // `sameSite: 'strict'` helps protect against CSRF (Cross-Site Request Forgery) attacks
       // by restricting when the browser sends the cookie.
       sameSite: "none",
+      httpOnly: true
     },
   })
 );
