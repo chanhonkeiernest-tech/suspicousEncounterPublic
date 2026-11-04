@@ -35,7 +35,7 @@ app.use(
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       // `sameSite: 'strict'` helps protect against CSRF (Cross-Site Request Forgery) attacks
       // by restricting when the browser sends the cookie.
-      sameSite: "strict",
+      sameSite: "none",
     },
   })
 );
