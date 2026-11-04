@@ -21,6 +21,7 @@ app.use(
   session({
     // `secret` for session ID cookie.
     //  Uses the SESSION_SECRET 
+    proxy : true, 
     secret: process.env.SESSION_SECRET || "your_secret_key",
     
     resave: false,
@@ -30,7 +31,7 @@ app.use(
     cookie: {
       // `secure: true` ensures the cookie is only sent over HTTPS. This should be true in production.
       // It's set based on the NODE_ENV environment variable.
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       // `maxAge` sets the maximum age of the cookie
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       // `sameSite: 'strict'` helps protect against CSRF (Cross-Site Request Forgery) attacks
