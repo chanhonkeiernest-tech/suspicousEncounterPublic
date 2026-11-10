@@ -105,7 +105,7 @@ router.get('/myEncounter', ensureAuthenticated, control.myEncounter);
  *       201:
  *         description: OK
  */
-router.post('/encounterMerge', ensureAuthenticated,control.newEncounter);
+router.post('/encounter', ensureAuthenticated, control.newEncounter);
 /**
  * @swagger
  * /encounter:
