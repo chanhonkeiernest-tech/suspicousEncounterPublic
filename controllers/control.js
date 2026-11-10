@@ -2,6 +2,7 @@ import encounter from '../model/encounter.js';
 import account from '../model/accountdb.js';
 import merge from '../model/merge.js';
 import mongoose from 'mongoose';
+import { recommend } from '../util/recommend.js';
 
 const checksession = (req, res) => {
     const authenticated = typeof req.isAuthenticated === 'function' &&
@@ -44,12 +45,16 @@ const oneEncounter=async (req, res) => {
         // const sortOption = {};
         // const sortDirection = order === "ase" ? 1 : -1;
         // sortOption[sortType] = sortDirection;
+        const suggest = await recommend(id);
         const encounterRecord = await encounter.findOne({ _id: id })
             .populate('user')
             .populate('related');
        
-        
-        res.json(encounterRecord);
+
+        res.json({
+            ...encounterRecord.toObject(),
+            recommendations: suggest
+        });
     }catch (error){
         res.status(500).json({ error: 'Server error' });
     }
@@ -64,15 +69,15 @@ const allEncounter=async (req, res) => {
 
         const filter = { origin: true };
         const nameQuery = typeof name === 'string' ? name.trim() : '';
-        const tagQuery = typeof tag === 'string' ? tag.trim() : '';
+        const tagQuery = typeof tag === 'string' ? tag.split(",").map(value => value.trim()).filter(Boolean): [];
         const typeQuery = typeof type === 'string' ? type.trim() : '';
         const issueQuery = typeof issue === 'string' ? issue.trim() : '';
 
         if (nameQuery) {
             filter.topic = new RegExp(nameQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
         }
-        if (tagQuery) {
-            filter.tag = new RegExp(tagQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+        if (tagQuery.length) {
+            filter.tag = {$in: tagQuery.map(value => new RegExp(tagQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'))};
         }
         if (typeQuery) filter.type = typeQuery;
         if (issueQuery) filter.issue = issueQuery;
@@ -82,7 +87,7 @@ const allEncounter=async (req, res) => {
         // const sortOption = {};
         // const sortDirection = order === "ase" ? 1 : -1;
         // sortOption[sortType] = sortDirection;
-        const listofencounter= await encounter.find(filter).populate('user', 'username rating').populate('related');//.sort(sortOption));
+        const listofencounter= await encounter.find(filter).populate('user', 'username').populate('related');//.sort(sortOption));
        
         
         res.json(listofencounter);
