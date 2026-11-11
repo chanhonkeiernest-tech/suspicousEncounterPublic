@@ -51,10 +51,10 @@ const oneEncounter=async (req, res) => {
             .populate('related');
        
 
-        res.json({
-            ...encounterRecord.toObject(),
-            recommendations: suggest
-        });
+        res.json([
+            encounterRecord.toObject(),
+            ...suggest
+        ]);
     }catch (error){
         res.status(500).json({ error: 'Server error' });
     }
