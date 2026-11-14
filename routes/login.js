@@ -94,7 +94,7 @@ router.get("/nouser", (req, res) => {
         .json({ message: "Logout failed", error: err.message });
     }
     // If logout is successful, redirect the user to the homepage (or any other appropriate page).
-    res.redirect("/login.html"); // Assuming index.html is your public homepage
+    res.status(201).json({status:"logouted"});// Assuming index.html is your public homepage
   });
 });
 
