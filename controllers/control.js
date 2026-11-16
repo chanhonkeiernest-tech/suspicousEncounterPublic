@@ -20,25 +20,35 @@ const checksession = (req, res) => {
 };
 
 const sameUser = async (encounterIds, user) => {
+
+    // A helper method that check wether or not a group of encounter all created by the same user
+
+    //check array and the id in it
     if (!Array.isArray(encounterIds) || encounterIds.length === 0 ||
         !encounterIds.every((id) => mongoose.isValidObjectId(id))) return false;
 
+    //group these encounter ID into an array and find the full encounter data at encounters
     const uniqueEncounterIds = [...new Set(encounterIds.map((id) => id.toString()))];
     const encounters = await encounter.find({ _id: { $in: uniqueEncounterIds } })
         .select('user')
         .lean();
-
+    
+        //If there is error regarding the user than the data is corrupted or incorrect
     if ( encounters.some((item) => !item.user)) {
         return false;
     }
+
+    //check wether or not
     for (let i =0 ;i<encounters.length;i++){
-        if(encounters[i]!=user)return false
+        if(encounters[i].user._id!=user._id)return false
     }
     
     return true;
 };
 
 const oneEncounter=async (req, res) => {
+
+    //
    try{
         const {id} = req.body;
 
