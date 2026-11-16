@@ -102,25 +102,139 @@ router.get('/myEncounter', ensureAuthenticated, control.myEncounter);
  *           schema:
  *             $ref: '#/components/schemas/newEncounter'
  *     responses:
- *       200:
+ *       201:
  *         description: OK
  */
-router.post('/encounter', ensureAuthenticated,control.newEncounter);
-
+router.post('/encounter', ensureAuthenticated, control.newEncounter);
+/**
+ * @swagger
+ * /encounter:
+ *   post:
+ *     summary: Call a merge for two encounter
+ *     tags:
+ *       - encounter
+ *     security:
+ *       - Passport: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/mergeEncounter'
+ *     responses:
+ *       201:
+ *         description: wait for approve
+ */
 router.post('/encounterMerge', ensureAuthenticated,control.mergeEncounter);
-
+/**
+ * @swagger
+ * /merge:
+ *   get:
+ *     summary: check the current pending merge for this account
+ *     tags:
+ *       - merge
+ *     security:
+ *       - Passport: []
+ *     responses:
+ *       200:
+ *         description: get list of pending merge
+ */
 router.get('/merge', ensureAuthenticated,control.pendingmerges);
-
+/**
+ * @swagger
+ * /encounterMerging:
+ *   post:
+ *     summary: confirm a merge
+ *     tags:
+ *       - merge
+ *     security:
+ *       - Passport: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/mergingEncounter'
+ *     responses:
+ *       201:
+ *         description: merge confirm
+ */
 router.post('/encounterMerging', ensureAuthenticated,control.mergingEncounter);
-
+/**
+ * @swagger
+ * /encounterMerging/reject:
+ *   post:
+ *     summary: reject a merge
+ *     tags:
+ *       - merge
+ *     security:
+ *       - Passport: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/mergingEncounter'
+ *     responses:
+ *       201:
+ *         description: merge reject
+ */
 router.post('/encounterMerge/reject', ensureAuthenticated, control.rejectMerge);
-
+/**
+ * @swagger
+ * /merge:
+ *   delete:
+ *     summary: unmerge an encounter chain
+ *     tags:
+ *       - encounter
+ *     security:
+ *       - Passport: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/mergingEncounter'
+ *     responses:
+ *       201:
+ *         description: unmerged
+ */
 router.delete('/merge', ensureAuthenticated,control.unmerge);
-
+/**
+ * @swagger
+ * /merge:
+ *   get:
+ *     summary: gets all the encounters that is merged to this encounter
+ *     tags:
+ *       - encounter
+ *     security:
+ *       - Passport: []
+ *     responses:
+ *       200:
+ *         description: get list of related
+ */
 router.get('/otherEncounter/:eid',control.relatedEncounter);
 
 
-// Delete an encounter (expects body: { id })
+/**
+ * @swagger
+ * /encounter:
+ *   delete:
+ *     summary: remove an encounter
+ *     tags:
+ *       - encounter
+ *     security:
+ *       - Passport: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/mergingEncounter'
+ *     responses:
+ *       201:
+ *         description: deleted
+ */
 router.delete('/encounter', ensureAuthenticated, control.deleteEncounter);
 
 //router.put('ecounter')

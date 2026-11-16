@@ -33,6 +33,7 @@ router.post("/newuser", async (req, res) => {
     if(password!=cpassword)res.status(402).json({ message: "Password does not match", error: error.message });
     const hashedpassword = await User.hashing(password);
     // Create a new user instance with the username and the hashed password.
+    if(username.includes("<")||username.includes("//")) res.status(402).json({ error: 'bad entry' });
     const newUser = new User({ username, password: hashedpassword });
     // Save the new user to the database.
     await newUser.save();
@@ -94,7 +95,7 @@ router.get("/nouser", (req, res) => {
         .json({ message: "Logout failed", error: err.message });
     }
     // If logout is successful, redirect the user to the homepage (or any other appropriate page).
-    res.redirect("/login.html"); // Assuming index.html is your public homepage
+    res.status(201).json({status:"logouted"});// Assuming index.html is your public homepage
   });
 });
 

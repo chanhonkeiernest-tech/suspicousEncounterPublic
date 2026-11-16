@@ -2,8 +2,13 @@ import encounter from '../model/encounter.js';
 import account from '../model/accountdb.js';
 import merge from '../model/merge.js';
 import mongoose from 'mongoose';
+import { recommend } from '../util/recommend.js';
+
+
 
 const checksession = (req, res) => {
+
+    //Use the passport function 
     const authenticated = typeof req.isAuthenticated === 'function' &&
         req.isAuthenticated() &&
         Boolean(req.user);
@@ -44,12 +49,16 @@ const oneEncounter=async (req, res) => {
         // const sortOption = {};
         // const sortDirection = order === "ase" ? 1 : -1;
         // sortOption[sortType] = sortDirection;
+        const suggest = await recommend(id);
         const encounterRecord = await encounter.findOne({ _id: id })
             .populate('user')
             .populate('related');
        
-        
-        res.json(encounterRecord);
+
+        res.json([
+            encounterRecord.toObject(),
+            ...suggest
+        ]);
     }catch (error){
         res.status(500).json({ error: 'Server error' });
     }
@@ -64,15 +73,15 @@ const allEncounter=async (req, res) => {
 
         const filter = { origin: true };
         const nameQuery = typeof name === 'string' ? name.trim() : '';
-        const tagQuery = typeof tag === 'string' ? tag.trim() : '';
+        const tagQuery = typeof tag === 'string' ? tag.split(",").map(value => value.trim()).filter(Boolean): [];
         const typeQuery = typeof type === 'string' ? type.trim() : '';
         const issueQuery = typeof issue === 'string' ? issue.trim() : '';
 
         if (nameQuery) {
             filter.topic = new RegExp(nameQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
         }
-        if (tagQuery) {
-            filter.tag = new RegExp(tagQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+        if (tagQuery.length) {
+            filter.tag = {$in: tagQuery.map(value => new RegExp(tagQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'))};
         }
         if (typeQuery) filter.type = typeQuery;
         if (issueQuery) filter.issue = issueQuery;
@@ -82,7 +91,7 @@ const allEncounter=async (req, res) => {
         // const sortOption = {};
         // const sortDirection = order === "ase" ? 1 : -1;
         // sortOption[sortType] = sortDirection;
-        const listofencounter= await encounter.find(filter).populate('user', 'username rating').populate('related');//.sort(sortOption));
+        const listofencounter= await encounter.find(filter).populate('user', 'username').populate('related');//.sort(sortOption));
        
         
         res.json(listofencounter);
@@ -117,10 +126,22 @@ const newEncounter=async (req, res) => {
         const {topic, description, tagString, imgString, type, issue} = req.body;
         const currentuser=await account.findOne({username : req.user.username});
         //const check = await checkdonotexist(title, currentuser._id);
+        if(topic.includes("<")||topic.includes("//")) res.status(402).json({ error: 'bad entry' });
+        if(description.includes("<")||description.includes("//")) res.status(402).json({ error: 'bad entry' });
+        if(tagString.includes("<")||tagString.includes("//")) res.status(402).json({ error: 'bad entry' });
         
-  
         const tag = tagString.split(", ");
-        const img = imgString.split(", ");
+        const tempimg = imgString.split(", ");
+
+        const img = tempimg.filter((i) =>{
+            try{
+                return (new URL(i)).hostname.replace('www.','')==="imgur.com"
+            }catch{
+                return false;
+            }
+            
+
+        });
 
         const createEncounter = new encounter({
                 topic, 

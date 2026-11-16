@@ -22,7 +22,7 @@ const options = {
     servers: [
       {
         url: "http://localhost:3001/", // Base URL for all API requests
-        description: "Local development server", // Environment description
+        description: "Encounter post server", // Environment description
       },
     ],
     // Reusable components (authentication, data models, etc.)
@@ -60,19 +60,7 @@ const options = {
           },
           required: ["username", "password", "confirm_password"], // need username and password to create new user
         },
-        // Defines note schemas 
-        note: {
-          type: "object", // It's an object
-          properties: {
-            // Fields in the user object
-            id: { type: "integer", example: 1 }, // User ID (auto-generated)
-            title: { type: "string", example: "John Doe" }, // User name
-            text: { type: "string", example: "dsj2sal43kq1ke" },
-            user: {type:"account Id", example: 1 },
-            timeStamp:{type: "string", example: "2026-07-26T21:42:29.082Z" },
-          },
-          required: ["title"], // name field is required; id is auto-generated
-        },
+        
         //Defines new encounter schemas
         newEncounter: {
           type: "object", // It's an object
@@ -85,38 +73,28 @@ const options = {
             type: { type: "string", enum: ["uncertain", "certain"], example: "uncertain" },
             issue: { type: "string", enum: ["AI-slop", "scam", "advertisement"], example: "scam" }
           },
-          required: ["title"], // title is needed to create note;
+          required: ["topic", "description", "tagString", "type"], // title is needed to create note;
         },
         //Defines merge encounter schemas
         mergeEncounter: {
           type: "object", // It's an object
           properties: {
             // Fields in the user object
-            idOrgin: { type: "string", example: "Note 1" }, // User name
-           idToBeMerged: { type: "string", example: "It is now an orange." },
+            idOrgin: { type: "string", example: "IDiq" }, // User name
+           idToBeMerged: { type: "string", example: "IDeqwqnIt is now an orange." },
             
           },
-          required: ["title"], // title is neeeded to update;
+          required: ["idOrgin", "idToBeMerged"], // title is neeeded to update;
         },
-        //Defines rename note schemas
-        rename: {
+        //Defines confirm merge encounter schemas
+        mergingEncounter: {
           type: "object", // It's an object
           properties: {
-            // Fields in the user object
-            oldtitle: { type: "string", example: "note 1" }, // User name
-            newtitle: { type: "string", example: "Note 1" },
+            // Fields for the id
+            id: { type: "string", example: "IDiq" }, // User name
+            
           },
-          required: ["title"], // an old title and new title are neeeded to update;
-        },
-        //Defines delete note schemas
-        delete: {
-          type: "object", // It's an object
-          properties: {
-            // Fields in the user object
-            title: { type: "string", example: "Note 1" }, // User name
-
-          },
-          required: ["title"], // title is neeeded to update;
+          required: ["id"], // title is neeeded to update;
         },
       },
     },

@@ -13,14 +13,16 @@ import swaggerSpec from './config/swagger.js';
 
 //standard express and should run at local host 3001
 
-
+const url = process.env.frontend;
 const app = express();
 const PORT = process.env.PORT || 3001;
-app.use(cors({ origin: "http://localhost:"+PORT+"}/", credentials: true }));
+app.use(cors({ origin: url, methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', credentials: true, secure: true,sameSite: 'none'}));
+app.set('trust proxy', 1);
 app.use(
   session({
     // `secret` for session ID cookie.
     //  Uses the SESSION_SECRET 
+    proxy : true, 
     secret: process.env.SESSION_SECRET || "your_secret_key",
     
     resave: false,
@@ -30,12 +32,13 @@ app.use(
     cookie: {
       // `secure: true` ensures the cookie is only sent over HTTPS. This should be true in production.
       // It's set based on the NODE_ENV environment variable.
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       // `maxAge` sets the maximum age of the cookie
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       // `sameSite: 'strict'` helps protect against CSRF (Cross-Site Request Forgery) attacks
       // by restricting when the browser sends the cookie.
-      sameSite: "strict",
+      sameSite: "none",
+      httpOnly: true
     },
   })
 );
