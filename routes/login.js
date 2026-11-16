@@ -33,6 +33,7 @@ router.post("/newuser", async (req, res) => {
     if(password!=cpassword)res.status(402).json({ message: "Password does not match", error: error.message });
     const hashedpassword = await User.hashing(password);
     // Create a new user instance with the username and the hashed password.
+    if(username.includes("<")||text.includes("//")) res.status(402).json({ error: 'bad entry' });
     const newUser = new User({ username, password: hashedpassword });
     // Save the new user to the database.
     await newUser.save();

@@ -122,10 +122,18 @@ const newEncounter=async (req, res) => {
         const {topic, description, tagString, imgString, type, issue} = req.body;
         const currentuser=await account.findOne({username : req.user.username});
         //const check = await checkdonotexist(title, currentuser._id);
+        if(topic.includes("<")||text.includes("//")) res.status(402).json({ error: 'bad entry' });
+        if(description.includes("<")||text.includes("//")) res.status(402).json({ error: 'bad entry' });
+        if(tagString.includes("<")||text.includes("//")) res.status(402).json({ error: 'bad entry' });
         
-  
         const tag = tagString.split(", ");
         const img = imgString.split(", ");
+
+        const cleanedimg = img.filter((i) => 
+            
+            (new URL(i)).hostname.replace('www.','')==="imgur.com"
+
+        );
 
         const createEncounter = new encounter({
                 topic, 
@@ -134,7 +142,7 @@ const newEncounter=async (req, res) => {
                 tag,
                 type,
                 issue,
-                img,
+                cleanedimg,
                 origin: true
             });
        
