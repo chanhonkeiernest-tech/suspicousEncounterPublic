@@ -122,9 +122,9 @@ const newEncounter=async (req, res) => {
         const {topic, description, tagString, imgString, type, issue} = req.body;
         const currentuser=await account.findOne({username : req.user.username});
         //const check = await checkdonotexist(title, currentuser._id);
-        if(topic.includes("<")||text.includes("//")) res.status(402).json({ error: 'bad entry' });
-        if(description.includes("<")||text.includes("//")) res.status(402).json({ error: 'bad entry' });
-        if(tagString.includes("<")||text.includes("//")) res.status(402).json({ error: 'bad entry' });
+        if(topic.includes("<")||topic.includes("//")) res.status(402).json({ error: 'bad entry' });
+        if(description.includes("<")||description.includes("//")) res.status(402).json({ error: 'bad entry' });
+        if(tagString.includes("<")||tagString.includes("//")) res.status(402).json({ error: 'bad entry' });
         
         const tag = tagString.split(", ");
         const tempimg = imgString.split(", ");
