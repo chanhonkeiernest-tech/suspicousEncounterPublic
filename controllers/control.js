@@ -127,9 +127,9 @@ const newEncounter=async (req, res) => {
         if(tagString.includes("<")||text.includes("//")) res.status(402).json({ error: 'bad entry' });
         
         const tag = tagString.split(", ");
-        const img = imgString.split(", ");
+        const tempimg = imgString.split(", ");
 
-        const cleanedimg = img.filter((i) => 
+        const img = tempimg.filter((i) => 
             
             (new URL(i)).hostname.replace('www.','')==="imgur.com"
 
@@ -142,7 +142,7 @@ const newEncounter=async (req, res) => {
                 tag,
                 type,
                 issue,
-                cleanedimg,
+                img,
                 origin: true
             });
        
