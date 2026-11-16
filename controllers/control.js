@@ -4,7 +4,11 @@ import merge from '../model/merge.js';
 import mongoose from 'mongoose';
 import { recommend } from '../util/recommend.js';
 
+
+
 const checksession = (req, res) => {
+
+    //Use the passport function 
     const authenticated = typeof req.isAuthenticated === 'function' &&
         req.isAuthenticated() &&
         Boolean(req.user);
@@ -129,11 +133,15 @@ const newEncounter=async (req, res) => {
         const tag = tagString.split(", ");
         const tempimg = imgString.split(", ");
 
-        const img = tempimg.filter((i) => 
+        const img = tempimg.filter((i) =>{
+            try{
+                return (new URL(i)).hostname.replace('www.','')==="imgur.com"
+            }catch{
+                return false;
+            }
             
-            (new URL(i)).hostname.replace('www.','')==="imgur.com"
 
-        );
+        });
 
         const createEncounter = new encounter({
                 topic, 
