@@ -1,7 +1,7 @@
 import encounter from '../model/encounter.js';
 
 const MIN_SIMILARITY = 0.1;
-
+//Create counting algorthim that count how many words is inside
 const termCounts = (text) => {
     const counts = new Map();
     const terms = text.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
@@ -12,7 +12,7 @@ const termCounts = (text) => {
 
     return counts;
 };
-
+//The math used to calcuate is a machine learning method that run dot product to all the text in it
 const cosineSimilarity = (left, right) => {
     let dotProduct = 0;
     let leftMagnitude = 0;
@@ -31,7 +31,7 @@ const cosineSimilarity = (left, right) => {
     if (leftMagnitude === 0 || rightMagnitude === 0) return 0;
     return dotProduct / (Math.sqrt(leftMagnitude) * Math.sqrt(rightMagnitude));
 };
-
+//A recommend system that recommend cloesly related post
 export const recommend = async (id) => {
     const source = await encounter.findById(id);
     if (!source) return [];

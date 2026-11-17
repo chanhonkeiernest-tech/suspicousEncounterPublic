@@ -5,8 +5,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = import.meta.dirname;
 var x =path.join(__dirname, "..", "server.js").replace(/\\/g, "/");
-console.log(__dirname);
-console.log(x);
+
 
 const options = {
   definition: {

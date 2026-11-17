@@ -27,15 +27,7 @@ const encounterSchema = new mongoose.Schema({
     contributedUser:{ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'accountdb' }], default: [] }
 }, { timestamps: true });
 
-// encounterSchema.pre(['deleteOne', 'findOneAndDelete'], async function(next) {
-//     const target = await this.model.findOne(this.getFilter()).select('evidence').lean();
 
-//     if (target?.evidence?.length) {
-//         await mongoose.model('evidence').deleteMany({ _id: { $in: target.evidence } });
-//     }
-
-//     next();
-// });
 
 const encounter = mongoose.model('encounter', encounterSchema);
 

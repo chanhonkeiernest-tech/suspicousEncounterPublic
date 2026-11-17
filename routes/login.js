@@ -32,7 +32,7 @@ router.post("/newuser", async (req, res) => {
     // The 'hashPassword' method is assumed to be a static method on the User model.
     if(password!=cpassword)res.status(402).json({ message: "Password does not match", error: error.message });
     const hashedpassword = await User.hashing(password);
-    // Create a new user instance with the username and the hashed password.
+    // Create a new user instance with the username and the hashed password and reject any bad username
     if(username.includes("<")||username.includes("//")) res.status(402).json({ error: 'bad entry' });
     const newUser = new User({ username, password: hashedpassword });
     // Save the new user to the database.
