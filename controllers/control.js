@@ -39,7 +39,7 @@ const sameUser = async (encounterIds, user) => {
         return false;
     }
 
-    //check wether or not
+    //check wether or not each of the encounter user field equal to parameter user
     for (const item of encounters) {
         if (item.user.toString() !== user._id.toString()) return false;
     }
@@ -49,17 +49,10 @@ const sameUser = async (encounterIds, user) => {
 
 const oneEncounter=async (req, res) => {
 
-    //
+    //Get one encounter, but include a bunch of suggestion
    try{
         const {id} = req.body;
 
-        
-
-        // const sortType=req.params.sortoption;
-        // const order=req.params.sortorder;
-        // const sortOption = {};
-        // const sortDirection = order === "ase" ? 1 : -1;
-        // sortOption[sortType] = sortDirection;
         const suggest = await recommend(id);
         const encounterRecord = await encounter.findOne({ _id: id })
             .populate('user')
@@ -79,6 +72,7 @@ const oneEncounter=async (req, res) => {
 //Function for handling fetching all the notes with the option of changing the query for searching speceific note, changing the search by option and changing the ordering of the list
 
 const allEncounter=async (req, res) => {
+
    try{
         const { tag, name, type, issue } = req.query;
 
@@ -97,12 +91,7 @@ const allEncounter=async (req, res) => {
         if (typeQuery) filter.type = typeQuery;
         if (issueQuery) filter.issue = issueQuery;
 
-        // const sortType=req.params.sortoption;
-        // const order=req.params.sortorder;
-        // const sortOption = {};
-        // const sortDirection = order === "ase" ? 1 : -1;
-        // sortOption[sortType] = sortDirection;
-        const listofencounter= await encounter.find(filter).populate('user', 'username').populate('related');//.sort(sortOption));
+        const listofencounter= await encounter.find(filter).populate('user', 'username').populate('related');
        
         
         res.json(listofencounter);
@@ -113,7 +102,7 @@ const allEncounter=async (req, res) => {
 
 const myEncounter=async (req, res) => {
    try{
-      
+        //Return a list of encounter created by a speceifc user based on login cookie
         const currentuser = await account.findOne({ username: req.user.username });
         if (!currentuser) return res.status(401).json({ message: 'Unauthorized' });
         const { type, issue } = req.query;
@@ -133,10 +122,11 @@ const myEncounter=async (req, res) => {
 
 const newEncounter=async (req, res) => {
    try{
-       
+       //Create new encounter
         const {topic, description, tagString, imgString, type, issue} = req.body;
         const currentuser=await account.findOne({username : req.user.username});
-        //const check = await checkdonotexist(title, currentuser._id);
+        
+        //remove danger symbole to prevent xss
         if(topic.includes("<")||topic.includes("//")) res.status(402).json({ error: 'bad entry' });
         if(description.includes("<")||description.includes("//")) res.status(402).json({ error: 'bad entry' });
         if(tagString.includes("<")||tagString.includes("//")) res.status(402).json({ error: 'bad entry' });
@@ -144,6 +134,7 @@ const newEncounter=async (req, res) => {
         const tag = tagString.split(", ");
         const tempimg = imgString.split(", ");
 
+        //All img link restrict to imgur.com link
         const img = tempimg.filter((i) =>{
             try{
                 return (new URL(i)).hostname.replace('www.','')==="imgur.com"
@@ -176,13 +167,15 @@ const newEncounter=async (req, res) => {
 
 
 const mergeEncounter=async (req, res) => {
+
+    //Create a merge request
    try{
        
         const {idOrgin, idToBeMerged} = req.body;
     const currentuser=await account.findOne({username : req.user.username});
     if (!currentuser) return res.status(401).json({ error: 'Unauthorized' });
-        //const check = await checkdonotexist(title, currentuser._id);
-
+        
+        //Get the requested encounter first and ensure that both are origin
         const encounterOrgin=await encounter.findById(idOrgin);
         const encounterToBeMerged=await encounter.findById(idToBeMerged);
                 if(!encounterOrgin || !encounterToBeMerged ||
@@ -190,7 +183,7 @@ const mergeEncounter=async (req, res) => {
                         idOrgin === idToBeMerged){
                     return res.status(400).json({ error: 'both has to be origin true' });
                 }
-
+        //First find wether or not such merge request already exist
         const existingPendingMerge = await merge.findOne({
             status: 'pending',
             $or: [
@@ -204,6 +197,8 @@ const mergeEncounter=async (req, res) => {
                 }
             ]
         });
+
+        //If it does, don't create new merge request
         if (existingPendingMerge) {
             const isOwner = encounterOrgin.user.equals(currentuser._id) ||
                 encounterToBeMerged.user.equals(currentuser._id);
@@ -222,8 +217,8 @@ const mergeEncounter=async (req, res) => {
         const proposerIsOwner = encounterOrgin.user.equals(currentuser._id) ||
             encounterToBeMerged.user.equals(currentuser._id);
 
-        //const sameOwner = await areEncountersOwnedBySameUser([idOrgin, idToBeMerged]);
-        
+        //create a new merge. If the issue is either post owner, no need to prommpt such user again by adding the user to confirm field.
+
         const sameOwner = encounterOrgin.user.equals(encounterToBeMerged.user);
         const newMerge = new merge({
             encounterOrgin: encounterOrgin._id,
@@ -237,6 +232,7 @@ const mergeEncounter=async (req, res) => {
         
         await newMerge.save();
 
+        //If both posts are created by the same user and the issue is such user, merge immdeiately.
         if (sameOwner && currentuser._id.equals(encounterOrgin.user)) {
             return mergingEncounter({
                 user: req.user,
@@ -291,16 +287,19 @@ const pendingmerges=async (req, res) => {
 
 const mergingEncounter=async (req, res) => {
    try{
-       
+       //Merging encounter function
         const {id} = req.body;
         const currentuser=await account.findOne({username :  req.user.username});
         if (!currentuser) return res.status(401).json({ error: 'Unauthorized' });
 
+        //First find the merge request for it
         const request = await merge.findOne({
             _id: id,
             status: 'pending',
             $or: [{ user1: currentuser._id }, { user2: currentuser._id }]
         });
+
+        //If no such request exist, than this is a bad request
         if (!request) {
             const existingMerge = await merge.findById(id);
             if (!existingMerge) return res.status(404).json({ error: 'Merge not found' });
@@ -314,6 +313,7 @@ const mergingEncounter=async (req, res) => {
             return res.status(404).json({ error: 'Merge not found' });
         }
 
+        //edit the merge request to record one user confimration
         let merging = await merge.findOneAndUpdate({
             _id: id,
             status: 'pending',
@@ -322,6 +322,8 @@ const mergingEncounter=async (req, res) => {
             $addToSet: { confirmedBy: currentuser._id }
         }, { returnDocument: 'after' });
         
+
+        //If all part has been confirmed finish the merge
         if(merging){
             const requiredUsers = [...new Set([merging.user1.toString(), merging.user2.toString()])];
             const isFullyConfirmed = requiredUsers.every(userId =>
@@ -331,25 +333,25 @@ const mergingEncounter=async (req, res) => {
             if(!isFullyConfirmed){
                 return res.status(202).json({ status: 'waiting for other user approval' });
             }
-
+            //Start by getting both post again
             const encounterOrgin=await encounter.findById(merging.encounterOrgin); //get the orgin encounter
             const encounterToBeMerged=await encounter.findById(merging.encounterToBeMerged); //get the to be merged encounter 
-
+            //ensure both origin
             if(!encounterOrgin || !encounterToBeMerged ||
                 encounterOrgin.origin !== true || encounterToBeMerged.origin !== true){
                 return res.status(400).json({ error: 'both has to be origin' });
             }
-
+            //edit the merge status
             merging = await merge.findOneAndUpdate({
                 _id: merging._id,
                 status: 'pending',
                 confirmedBy: { $all: requiredUsers },
             }, { $set: { status: 'merging' } }, { returnDocument: 'after' });
-
+            //This is to prevent race condition becuase if update fail this indcate that the request has been removed thus merge has been completed
             if(!merging){
                 return res.status(202).json({ status: 'merge is already being processed' });
             }
-
+            //Combine all the tag together
             const newTag = encounterOrgin.tag;
             const otherTag = encounterToBeMerged.tag;
             for(let i=0; i<otherTag.length; i++){
@@ -357,9 +359,12 @@ const mergingEncounter=async (req, res) => {
                 newTag.push(otherTag[i]);
                 }
             }
+
+            //combine the related post information
             const newRelation = encounterOrgin.related.concat(encounterToBeMerged.related);
             newRelation.push(encounterToBeMerged._id);
 
+            //combine the contributed User list
             const contributedUserIds = new Set();
             const contributedUsers = [
                 ...encounterOrgin.contributedUser,
@@ -370,6 +375,7 @@ const mergingEncounter=async (req, res) => {
                 contributedUserIds.add(userIdString);
                 return true;
             });
+            //count how many time same user try to merge to their own post
             var newSameUser = 0;
             if(encounterOrgin.user.equals(encounterToBeMerged.user)){
                 newSameUser = encounterToBeMerged.sameUser+encounterOrgin.sameUser+1;
@@ -400,7 +406,7 @@ const mergingEncounter=async (req, res) => {
                     
                 },{returnDocument: 'after'}
             );
-
+            //This is a castcate update so all other existed merge will point to the same new root in a case one of the merge brings in a group of merged posted
             const relatedEncounterIds = [...new Set(
                 encounterToBeMerged.related.map((id) => id.toString())
             )];
@@ -409,9 +415,12 @@ const mergingEncounter=async (req, res) => {
                 { $set: { related: [merging.encounterOrgin] } }
             );
 
+            //If any fail return error
             if(!eO||!eM||reparentedRelated.matchedCount !== relatedEncounterIds.length) {
                 return res.status(400).json({ error: "fail to merge" });
             }
+
+            //remove all merges the invole the tobeMerged as it no longer is an oriigin all other requests will be void and are illegal
             const mergesToRemove = await merge.find({
                 $or: [
                     { encounterOrgin: merging.encounterToBeMerged },
@@ -420,7 +429,8 @@ const mergingEncounter=async (req, res) => {
             }).select('_id').lean();
             const mergeIdsToRemove = mergesToRemove.map(({ _id }) => _id);
             const removeAllMerge = await merge.deleteMany({ _id: { $in: mergeIdsToRemove } });
-            //const removeMerge = await merge.deleteOne({ _id : id});
+            
+            //ensure all request has been clear also update account information for its rejected merges as they no longer exist
             if(removeAllMerge.deletedCount === mergeIdsToRemove.length){
                 if (mergeIdsToRemove.length > 0) {
                     await account.updateMany(
@@ -436,6 +446,7 @@ const mergingEncounter=async (req, res) => {
             
 
         }else{
+            //This will make sure race condtion to be minimum 
             const existingMerge = await merge.findById(id);
             if(existingMerge && existingMerge.status === 'merging'){
                 return res.status(202).json({ status: 'merge is already being processed' });
