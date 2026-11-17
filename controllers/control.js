@@ -69,9 +69,8 @@ const oneEncounter=async (req, res) => {
 };
 
 
-//Function for handling fetching all the notes with the option of changing the query for searching speceific note, changing the search by option and changing the ordering of the list
-
 const allEncounter=async (req, res) => {
+    //Function for handling fetching all the notes with the option of changing the query for searching speceific note, changing the search by option and changing the ordering of the list
 
    try{
         const { tag, name, type, issue } = req.query;
@@ -253,9 +252,11 @@ const mergeEncounter=async (req, res) => {
 
 const pendingmerges=async (req, res) => {
     try{
-              
+        //retrive a list of pending request for the user currently login      
         const currentuser=await account.findOne({username :  req.user.username});
         if (!currentuser) return res.status(401).json({ error: 'Unauthorized' });
+
+        //First group of pending will be those that has not been rejected or accepted
         const mergeP = await merge.find({
                 status: 'pending',
                 _id: { $nin: currentuser.rejectedMerges },
@@ -267,6 +268,8 @@ const pendingmerges=async (req, res) => {
                 .populate('user1', 'username rating')
                 .populate('user2', 'username rating')
                 .populate('userprompted');
+
+        //The other group will be the rejected group. Using rejected id list recorded in the user account line 274        
         const mergeR = await  merge.find({
                 _id: { $in: currentuser.rejectedMerges },
                 $or: [{ user1: currentuser._id }, { user2: currentuser._id }],
@@ -470,18 +473,18 @@ const mergingEncounter=async (req, res) => {
 };
 
 const rejectMerge = async (req, res) => {
-    
+    //This function is for use to reject a merge request
     try {
         const { id } = req.body;
         const currentuser = await account.findOne({ username: req.user.username });
         if (!currentuser) return res.status(401).json({ error: 'Unauthorized' });
-
+        //find the request first 
         const pendingRequest = await merge.findOne({
             _id: id,
             status: 'pending',
             $or: [{ user1: currentuser._id }, { user2: currentuser._id }]
         });
-
+        //If it doesn't exist return error 
         if (!pendingRequest) {
             const existingRequest = await merge.findById(id);
             if (!existingRequest) return res.status(404).json({ error: 'Merge not found' });
@@ -491,7 +494,7 @@ const rejectMerge = async (req, res) => {
             }
             return res.status(409).json({ error: 'Merge request is no longer pending' });
         }
-
+        //we mark the reject record on the user account instead
         const updatedAccount = await account.findOneAndUpdate(
             { _id: currentuser._id },
             { $addToSet: { rejectedMerges: pendingRequest._id } },
@@ -511,15 +514,16 @@ const rejectMerge = async (req, res) => {
 };
 
 const unmerge = async (req, res) => {
+    //umerge request 
    try{
        const {id} = req.body;
        const currentuser=await account.findOne({username :  req.user.username});
        if (!currentuser) return res.status(401).json({ error: 'Unauthorized' });
- 
+       //Find that post first and make sure it is a child merge not a parent or root 
        const encounterTarget = await encounter.findOne({_id: id, user: currentuser._id, origin: false});
 
        if(!encounterTarget)return res.status(401).json({ error: 'Encounter not found or this encounter does not belong to you' });
-       
+       //If there is no source, this is a corrupt data and should not be process
        const sourceEncounter = await encounter.findOne({_id: encounterTarget.related[0], origin: true});
 
        if(!sourceEncounter )return res.status(403).json({ error: 'The other encounter not found or you are trying to umerge an origin' });
@@ -531,7 +535,7 @@ const unmerge = async (req, res) => {
             !(await sameUser(newRelation, currentuser))) {
             return res.status(401).json({ error: 'Not allow to unmerge source' });
         }
-
+        //Edit the child post list to reflect the merge and upate accordingly
         const index = newRelation.indexOf(id);
         const removeIndex = sourceEncounter.contributedUser.indexOf(currentuser);
         const newConributedUser = sourceEncounter.contributedUser.splice(removeIndex,1);
@@ -576,9 +580,10 @@ const unmerge = async (req, res) => {
 
 
 const relatedEncounter =async (req, res) => {
+    //A request to just get the child post of a post
    try{
         const eid=req.params.eid;        
-  
+        //Make sure the request entry is a parent or root post
         const sourceEncounter= await encounter.findOne({_id:eid, origin: true});
         if(!sourceEncounter){
             return res.status(401).json({ error: 'Encounter not found' });
@@ -586,7 +591,7 @@ const relatedEncounter =async (req, res) => {
         }
         
         const relatedEncounterIDs=sourceEncounter.related;
-
+        //Since the list onky record id we need to query it again to get the full post
         const relatedEncounters= await Promise.all(
             relatedEncounterIDs.map( async(ID) => {
                 return await encounter.findById(ID).lean();})
@@ -602,18 +607,20 @@ const relatedEncounter =async (req, res) => {
 
 
 
-    //User are expect to unmerge before deleting encounter
+    
 
     const deleteEncounter = async (req, res) => {
+        //Function for deleting a post
         try {
             const { id } = req.body;
             if (!id) return res.status(400).json({ message: 'Missing id' });
 
             const currentuser = await account.findOne({ username: req.user && req.user.username });
             if (!currentuser) return res.status(401).json({ message: 'Unauthorized' });
-
+            //Start with find the post
             const target = await encounter.findOne({ _id: id, user: currentuser._id });
             if (!target) return res.status(404).json({ message: 'Encounter not found' });
+            //It is important to not for data intergity reason, only post that has no child can be delete. Thus unmerge everything first
             if (target.origin === true && target.related.length === 0) { 
                 await encounter.deleteOne({ _id: id });
             }

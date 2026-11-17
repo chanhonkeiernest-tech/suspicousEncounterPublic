@@ -86,7 +86,7 @@ const options = {
           },
           required: ["idOrgin", "idToBeMerged"], // title is neeeded to update;
         },
-        //Defines confirm merge encounter schemas
+        //Defines confirm merge encounter schemas. This schemas is also used by many other post such as encounter request
         mergingEncounter: {
           type: "object", // It's an object
           properties: {
