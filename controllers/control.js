@@ -85,8 +85,11 @@ const allEncounter=async (req, res) => {
             filter.topic = new RegExp(nameQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
         }
         if (tagQuery.length) {
-            filter.tag = {$in: tagQuery.map(value => new RegExp(tagQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'))};
-        }
+               filter.tag = {
+                $in: tagQuery.map(value =>
+                    new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
+                )
+            };
         if (typeQuery) filter.type = typeQuery;
         if (issueQuery) filter.issue = issueQuery;
 
