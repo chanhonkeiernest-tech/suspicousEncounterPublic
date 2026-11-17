@@ -21,6 +21,7 @@ const mergeSchema = new mongoose.Schema({
         ref: 'accountdb',
         required: true,
     },
+    //This indicate how started this request
     userprompted:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'accountdb',

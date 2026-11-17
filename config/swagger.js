@@ -5,8 +5,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = import.meta.dirname;
 var x =path.join(__dirname, "..", "server.js").replace(/\\/g, "/");
-console.log(__dirname);
-console.log(x);
+
 
 const options = {
   definition: {
@@ -86,7 +85,7 @@ const options = {
           },
           required: ["idOrgin", "idToBeMerged"], // title is neeeded to update;
         },
-        //Defines confirm merge encounter schemas
+        //Defines confirm merge encounter schemas. This schemas is also used by many other post such as encounter request
         mergingEncounter: {
           type: "object", // It's an object
           properties: {

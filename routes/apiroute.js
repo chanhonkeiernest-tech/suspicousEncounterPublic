@@ -4,7 +4,7 @@ import control from '../controllers/control.js';
 
 const router = express.Router();
 
-// all the route for adding, editing, renaming and removing note with addion of authenticate middware.
+// an authenticated middware that is used by most request except speceific or general ecounter request
 function ensureAuthenticated(req, res, next) {
   
   if (req.isAuthenticated()) {
@@ -14,6 +14,28 @@ function ensureAuthenticated(req, res, next) {
   
   res.status(409).json({ message: "Unauthorized" });
 }
+
+
+/**
+ * @swagger
+ * /encounterOne:
+ *   post:
+ *     summary: User requests to view a specific encounter post
+ *     tags:
+ *       - merge
+ *     security:
+ *       - Passport: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/mergingEncounter'
+ *     responses:
+ *       201:
+ *         description: ok
+ */
+
 
 router.post('/encounterOne',control.oneEncounter);
 
@@ -60,7 +82,7 @@ router.get('/encounter',control.allEncounter);
  * @swagger
  * /myEncounter:
  *   get:
- *     summary: Gets encounters posted by the authenticated user
+ *     summary: Gets all the encounters posted by the authenticated user
  *     tags:
  *       - encounter
  *     security:
@@ -110,7 +132,7 @@ router.post('/encounter', ensureAuthenticated, control.newEncounter);
  * @swagger
  * /encounter:
  *   post:
- *     summary: Call a merge for two encounter
+ *     summary: Calls a merge for two encounters and creates a request to wait for consent. Both encounters must not be already a child.
  *     tags:
  *       - encounter
  *     security:
@@ -130,7 +152,7 @@ router.post('/encounterMerge', ensureAuthenticated,control.mergeEncounter);
  * @swagger
  * /merge:
  *   get:
- *     summary: check the current pending merge for this account
+ *     summary: looks for all current pending merges for this account
  *     tags:
  *       - merge
  *     security:
@@ -144,7 +166,7 @@ router.get('/merge', ensureAuthenticated,control.pendingmerges);
  * @swagger
  * /encounterMerging:
  *   post:
- *     summary: confirm a merge
+ *     summary: It confirms the merge request and if all consents have been given the merge will be commited.
  *     tags:
  *       - merge
  *     security:
@@ -164,7 +186,7 @@ router.post('/encounterMerging', ensureAuthenticated,control.mergingEncounter);
  * @swagger
  * /encounterMerging/reject:
  *   post:
- *     summary: reject a merge
+ *     summary: Marks that a user has chose to reject a merge request
  *     tags:
  *       - merge
  *     security:
@@ -184,7 +206,7 @@ router.post('/encounterMerge/reject', ensureAuthenticated, control.rejectMerge);
  * @swagger
  * /merge:
  *   delete:
- *     summary: unmerge an encounter chain
+ *     summary: unmerges an merged encounter child away from his current parent encounter 
  *     tags:
  *       - encounter
  *     security:
@@ -220,7 +242,7 @@ router.get('/otherEncounter/:eid',control.relatedEncounter);
  * @swagger
  * /encounter:
  *   delete:
- *     summary: remove an encounter
+ *     summary: remove an encounter, but the encounter must have no depent merged child
  *     tags:
  *       - encounter
  *     security:
