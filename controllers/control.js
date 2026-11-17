@@ -34,13 +34,14 @@ const sameUser = async (encounterIds, user) => {
         .lean();
     
         //If there is error regarding the user than the data is corrupted or incorrect
-    if ( encounters.some((item) => !item.user)) {
+    if (encounters.length !== uniqueEncounterIds.length ||
+        encounters.some((item) => !item.user)) {
         return false;
     }
 
     //check wether or not
-    for (let i =0 ;i<encounters.length;i++){
-        if(encounters[i].user._id!=user._id)return false
+    for (const item of encounters) {
+        if (item.user.toString() !== user._id.toString()) return false;
     }
     
     return true;
@@ -122,7 +123,7 @@ const myEncounter=async (req, res) => {
         if (typeQuery) filter.type = typeQuery;
         if (issueQuery) filter.issue = issueQuery;
 
-        const listofencounter = await encounter.find(filter).populate('related');
+        const listofencounter = await encounter.find(filter).populate('user').populate('related')
         res.json(listofencounter);
     }catch (error){
         res.status(500).json({ error: 'Server error' });
@@ -502,10 +503,12 @@ const unmerge = async (req, res) => {
    try{
        const {id} = req.body;
        const currentuser=await account.findOne({username :  req.user.username});
+       if (!currentuser) return res.status(401).json({ error: 'Unauthorized' });
  
        const encounterTarget = await encounter.findOne({_id: id, user: currentuser._id, origin: false});
 
        if(!encounterTarget)return res.status(401).json({ error: 'Encounter not found or this encounter does not belong to you' });
+       
        const sourceEncounter = await encounter.findOne({_id: encounterTarget.related[0], origin: true});
 
        if(!sourceEncounter )return res.status(403).json({ error: 'The other encounter not found or you are trying to umerge an origin' });
@@ -513,7 +516,10 @@ const unmerge = async (req, res) => {
         
         
         //When the soruce encounter is rely on by other encoutner created by user that's not the source user, all other encoutner created by the source user and merged to this source encouter cannot be remove until the source encouter is longer that user. 
-        if(sourceEncounter.user===encounterTarget.user&&!sameUser(newRelation, currentuser))return res.status(401).json({ error: 'Not allow to unmerge source' });
+        if (sourceEncounter.user.equals(encounterTarget.user) &&
+            !(await sameUser(newRelation, currentuser))) {
+            return res.status(401).json({ error: 'Not allow to unmerge source' });
+        }
 
         const index = newRelation.indexOf(id);
         const removeIndex = sourceEncounter.contributedUser.indexOf(currentuser);
