@@ -95,6 +95,7 @@ const allEncounter=async (req, res) => {
         
         res.json(listofencounter);
     }catch (error){
+        console.error('allEncounter error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
