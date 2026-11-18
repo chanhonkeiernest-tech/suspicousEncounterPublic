@@ -61,6 +61,16 @@ router.get('/checksession', control.checksession);
  *       - encounter
  *     parameters:
  *       - in: query
+ *         name: tag
+ *         schema:
+ *           type: string
+ *         description: Filter by topic
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Filter by tag
+ *       - in: query
  *         name: type
  *         schema:
  *           type: string
