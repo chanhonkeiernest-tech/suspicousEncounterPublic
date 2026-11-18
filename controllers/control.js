@@ -78,7 +78,7 @@ const allEncounter=async (req, res) => {
 
         const filter = { origin: true };
         const nameQuery = typeof name === 'string' ? name.trim() : '';
-        const tagQuery = typeof tag === 'string' ? tag.split(",").map(value => value.trim()).filter(Boolean): [];
+        const tagQuery = typeof tag === 'string' ? tag.split(",").map(value => value.trim()): [];
         const typeQuery = typeof type === 'string' ? type.trim() : '';
         const issueQuery = typeof issue === 'string' ? issue.trim() : '';
 
