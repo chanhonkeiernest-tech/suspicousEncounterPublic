@@ -41,9 +41,9 @@ app.use(
       sameSite: "none",
       httpOnly: true
     },
-    store: new MemoryStore({
-      checkPeriod: 86400000 // fix memeory leak
-    }),
+    // store: new MemoryStore({
+    //   checkPeriod: 86400000 // fix memeory leak
+    // }),
   })
 );
 
