@@ -85,19 +85,15 @@ const allEncounter=async (req, res) => {
         if (nameQuery) {
             filter.topic = new RegExp(nameQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
         }
-        
+        if (tagQuery.length) {
+            filter.tag = {$in: tagQuery};
+        }
         if (typeQuery) filter.type = typeQuery;
         if (issueQuery) filter.issue = issueQuery;
-        let listofencounter=[];
-        if (tagQuery) {
-            console.log("tag ran");
-            listofencounter= await encounter.find({tag: {$in: tagQuery}}).populate('user', 'username').populate('related');
 
-        }
-        else {
-            listofencounter= await encounter.find(filter).populate('user', 'username').populate('related');
+        const listofencounter= await encounter.find(filter).populate('user', 'username').populate('related');
        
-        }
+        
         res.json(listofencounter);
     }catch (error){
         console.error('allEncounter error:', error);
