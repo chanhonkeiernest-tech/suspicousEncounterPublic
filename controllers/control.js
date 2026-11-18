@@ -78,7 +78,7 @@ const allEncounter=async (req, res) => {
 
         const filter = { origin: true };
         const nameQuery = typeof name === 'string' ? name.trim() : '';
-        const tagQuery = typeof tag === 'string' ? tag.split(","): [];
+        const tagQuery = typeof tag === 'string' ? tag.split(",").map(value => value.trim()).filter(Boolean): [];
         const typeQuery = typeof type === 'string' ? type.trim() : '';
         const issueQuery = typeof issue === 'string' ? issue.trim() : '';
 
@@ -86,7 +86,7 @@ const allEncounter=async (req, res) => {
             filter.topic = new RegExp(nameQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
         }
         if (tagQuery.length) {
-            filter.tag = {$in: tagQuery};
+            filter.tag = tagQuery;
         }
         if (typeQuery) filter.type = typeQuery;
         if (issueQuery) filter.issue = issueQuery;
