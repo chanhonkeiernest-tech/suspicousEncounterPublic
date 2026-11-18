@@ -57,18 +57,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // load the
 app.use(passport.initialize());
 
 app.use(passport.session());
-// In non-production environments, accept an Authorization header as mock authentication.
-// This middleware is added early so route-level `ensureAuthenticated` checks see it.
-if (process.env.NODE_ENV !== "production") {
-  app.use((req, res, next) => {
-    const authHeader = req.get("Authorization") || req.get("authorization");
-    if (authHeader) {
-      req.isAuthenticated = () => true;
-      req.user = { username: "test-user", role: "admin" };
-    }
-    next();
-  });
-}
+
 connectdb();
 
 // static front end in order to run well with the passport
