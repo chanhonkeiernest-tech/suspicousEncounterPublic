@@ -89,7 +89,7 @@ const allEncounter=async (req, res) => {
         if (typeQuery) filter.type = typeQuery;
         if (issueQuery) filter.issue = issueQuery;
         let listofencounter=[];
-        if (tagQuery.length) {
+        if (tagQuery) {
             console.log("tag ran");
             listofencounter= await encounter.find( {tag: {$in: tagQuery}}).populate('user', 'username').populate('related');
 
