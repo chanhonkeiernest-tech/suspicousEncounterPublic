@@ -74,7 +74,7 @@ const allEncounter=async (req, res) => {
     //Function for handling fetching all the notes with the option of changing the query for searching speceific note, changing the search by option and changing the ordering of the list
 
    try{
-        const { name, type, issue } = req.query;
+        const { tag, name, type, issue } = req.query;
 
         const filter = { origin: true };
         const nameQuery = typeof name === 'string' ? name.trim() : '';
