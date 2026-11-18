@@ -6,6 +6,7 @@ import loginroute from './routes/login.js';
 import connectdb from './database/config.js';
 import passport from 'passport';
 import session from 'express-session';
+import MemoryStore from 'memorystore';
 import './passportconfig.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger.js';
@@ -40,6 +41,9 @@ app.use(
       sameSite: "none",
       httpOnly: true
     },
+    // store: new MemoryStore({
+    //   checkPeriod: 86400000 // fix memeory leak
+    // }),
   })
 );
 

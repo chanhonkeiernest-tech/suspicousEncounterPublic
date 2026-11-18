@@ -64,6 +64,7 @@ const oneEncounter=async (req, res) => {
             ...suggest
         ]);
     }catch (error){
+        console.error('oneEncounter error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
@@ -85,7 +86,7 @@ const allEncounter=async (req, res) => {
             filter.topic = new RegExp(nameQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
         }
         if (tagQuery.length) {
-            filter.tag = {$in: tagQuery.map(value => new RegExp(tagQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'))};
+            filter.tag = {$in: tagQuery};
         }
         if (typeQuery) filter.type = typeQuery;
         if (issueQuery) filter.issue = issueQuery;
@@ -95,6 +96,7 @@ const allEncounter=async (req, res) => {
         
         res.json(listofencounter);
     }catch (error){
+        console.error('allEncounter error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
@@ -114,6 +116,7 @@ const myEncounter=async (req, res) => {
         const listofencounter = await encounter.find(filter).populate('user').populate('related')
         res.json(listofencounter);
     }catch (error){
+        console.error('myEncounter error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
@@ -160,6 +163,7 @@ const newEncounter=async (req, res) => {
         
         res.status(201).json({status:"created"});
     }catch (error){
+        console.error('new encounter error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
@@ -246,6 +250,7 @@ const mergeEncounter=async (req, res) => {
         
         res.status(201).json({ status: "wait for approve" });
     }catch (error){
+        console.error('merge encounter error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
@@ -284,6 +289,7 @@ const pendingmerges=async (req, res) => {
         return res.json({ mergeP, mergeR });
 
     }catch (error){
+        console.error('pending:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
@@ -468,6 +474,7 @@ const mergingEncounter=async (req, res) => {
         
         
     }catch (error){
+        console.error('merging error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
@@ -509,6 +516,7 @@ const rejectMerge = async (req, res) => {
             mergeRequestId: pendingRequest._id
         });
     } catch (error) {
+        console.error('reject error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
@@ -574,6 +582,7 @@ const unmerge = async (req, res) => {
         }
        
     }catch (error){
+        console.error('unmerge error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
@@ -600,6 +609,7 @@ const relatedEncounter =async (req, res) => {
         return res.json(relatedEncounters);
        
     }catch (error){
+        console.error('related error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
