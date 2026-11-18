@@ -91,7 +91,7 @@ const allEncounter=async (req, res) => {
         let listofencounter=[];
         if (tagQuery) {
             console.log("tag ran");
-            listofencounter= await encounter.find( {tag: {$in: tagQuery}}).populate('user', 'username').populate('related');
+            listofencounter= await encounter.find({tag: {$in: tagQuery}}).populate('user', 'username').populate('related');
 
         }
         else {
