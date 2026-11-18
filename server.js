@@ -13,7 +13,7 @@ import swaggerSpec from './config/swagger.js';
 
 
 //standard express and should run at local host 3001
-
+const MemoryStore = createMemoryStore(session);
 const url = process.env.frontend;
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -41,9 +41,9 @@ app.use(
       sameSite: "none",
       httpOnly: true
     },
-    // store: new MemoryStore({
-    //   checkPeriod: 86400000 // fix memeory leak
-    // }),
+    store: new MemoryStore({
+      checkPeriod: 86400000 // fix memeory leak
+    }),
   })
 );
 
