@@ -42,7 +42,26 @@ You can view them all in swagger documentation: https://suspicousencounterpublic
 
 ## Database
 Mongoose database more information in data section
+
 ## Util
 Helping function to help process request
 
+# Installation
+Fork the project and run it as an npm project. 
+Download all the dependency and set of a .env file for the port, database link, and secert for cookie.
 
+# Usage
+Since this is just a backend, you will have to send http request to the listening point.
+
+# Technologies used
+chai and mocha for testing
+express for the http
+dotenv for env
+mongoose for database
+passport for authentication 
+swagger for documentation Note: since some request require knowing encounter post id the simulation usually don't retrieve any result. 
+
+# Improvement
+Features such as forgot password, email verfication have not been implemented and can improve the user experience. 
+Some form of feature using the user statistic will help deter bot account.
+Some changes to the data structure or the limiting number of post to be feature might improve the speed.
