@@ -139,7 +139,7 @@ const newEncounter=async (req, res) => {
         //All img link restrict to imgur.com link
         const img = tempimg.filter((i) =>{
             try{
-                return (new URL(i)).hostname.replace('www.','')==="imgur.com"
+                return new URL(i).hostname==="www.imgur.com"
             }catch{
                 return false;
             }
